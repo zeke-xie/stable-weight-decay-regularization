@@ -57,7 +57,7 @@ class AdamS(Optimizer):
                 loss = closure()
                     
         param_size = 0
-        adaptive_sum = 0.
+        exp_avg_hat_sum = 0.
 
         for group in self.param_groups:
             for p in group['params']:
@@ -109,11 +109,14 @@ class AdamS(Optimizer):
 
                 step_size = group['lr'] / bias_correction1 
                 
+                # Store adaptive learning rate
                 state['adaptive_lr'].mul_(0).add_(step_size / denom)
                 
-                adaptive_sum += exp_avg_sq.sum() / bias_correction2 
-                  
-            adaptive_mean = math.sqrt(adaptive_sum / param_size)
+                # Calculate the sum of all elements in exp_avg_sq_hat
+                exp_avg_hat_sum += exp_avg_sq.sum() / bias_correction2 
+
+            # Calculate the sqrt of the mean of all elements in exp_avg_sq_hat  
+            exp_avg_mean_sqrt = math.sqrt(exp_avg_hat_sum / param_size)
             
             for group in self.param_groups:
                 for p in group['params']:
@@ -125,7 +128,7 @@ class AdamS(Optimizer):
                     exp_avg = state['exp_avg']
 
                     if group['weight_decay'] !=0:
-                        p.data.mul_(1 - group['weight_decay'] * group['lr'] / adaptive_mean)
+                        p.data.mul_(1 - group['weight_decay'] * group['lr'] / exp_avg_mean_sqrt)
                     
                     p.addcmul_(exp_avg, - state['adaptive_lr'])
                 
