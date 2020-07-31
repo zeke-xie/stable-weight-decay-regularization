@@ -88,6 +88,7 @@ class AdaiS(Optimizer):
                 
                 exp_avg_sq_hat_sum += exp_avg_sq_hat.sum()
                 
+        # Calculate the mean of all elements in exp_avg_sq_hat
         exp_avg_sq_hat_mean = exp_avg_sq_hat_sum / param_size
         
         for group in self.param_groups:
@@ -97,7 +98,7 @@ class AdaiS(Optimizer):
                     continue
                 grad = p.grad.data
                 
-                # Perform stable weight decay
+                # Perform stable/decoupled weight decay
                 if group['weight_decay'] !=0:
                     p.data.mul_(1 - group['lr'] * group['weight_decay'])
                 
