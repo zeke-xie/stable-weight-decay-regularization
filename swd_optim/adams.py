@@ -41,7 +41,7 @@ class AdamS(Optimizer):
     def __setstate__(self, state):
         super(AdamS, self).__setstate__(state)
         for group in self.param_groups:
-            group.setdefault('amsgrad', False)
+            group.setdefault('amsgrad', True)
 
     @torch.no_grad()
     def step(self, closure=None):
@@ -55,15 +55,14 @@ class AdamS(Optimizer):
         if closure is not None:
             with torch.enable_grad():
                 loss = closure()
-                    
-        param_size = 0
-        exp_avg_hat_sum = 0.
 
+        param_size = 0
+        exp_avg_sq_hat_sum = 0.
+        
         for group in self.param_groups:
             for p in group['params']:
                 if p.grad is None:
                     continue
-                
                 param_size += p.numel()
 
                 # Perform optimization step
@@ -81,55 +80,58 @@ class AdamS(Optimizer):
                     state['exp_avg'] = torch.zeros_like(p, memory_format=torch.preserve_format)
                     # Exponential moving average of squared gradient values
                     state['exp_avg_sq'] = torch.zeros_like(p, memory_format=torch.preserve_format)
-                    # Adaptive lr
-                    state['adaptive_lr'] = torch.zeros_like(p, memory_format=torch.preserve_format)
                     if amsgrad:
                         # Maintains max of all exp. moving avg. of sq. grad. values
                         state['max_exp_avg_sq'] = torch.zeros_like(p, memory_format=torch.preserve_format)
 
-                exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
-                if amsgrad:
-                    max_exp_avg_sq = state['max_exp_avg_sq']
                 beta1, beta2 = group['betas']
+                exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
 
                 state['step'] += 1
-                bias_correction1 = 1 - beta1 ** state['step']
                 bias_correction2 = 1 - beta2 ** state['step']
 
                 # Decay the first and second moment running average coefficient
                 exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)
                 exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)
                 if amsgrad:
+                    max_exp_avg_sq = state['max_exp_avg_sq']
                     # Maintains the maximum of all 2nd moment running avg. till now
                     torch.max(max_exp_avg_sq, exp_avg_sq, out=max_exp_avg_sq)
                     # Use the max. for normalizing running avg. of gradient
-                    denom = (max_exp_avg_sq.sqrt() / math.sqrt(bias_correction2)).add_(group['eps'])
+                    exp_avg_sq_hat = max_exp_avg_sq / bias_correction2
                 else:
-                    denom = (exp_avg_sq.sqrt() / math.sqrt(bias_correction2)).add_(group['eps'])
-
-                step_size = group['lr'] / bias_correction1 
+                    exp_avg_sq_hat = exp_avg_sq / bias_correction2
                 
-                # Store adaptive learning rate
-                state['adaptive_lr'].mul_(0).add_(step_size / denom)
-                
-                # Calculate the sum of all elements in exp_avg_sq_hat
-                exp_avg_hat_sum += exp_avg_sq.sum() / bias_correction2 
+                exp_avg_sq_hat_sum += exp_avg_sq_hat.sum()
 
-            # Calculate the sqrt of the mean of all elements in exp_avg_sq_hat  
-            exp_avg_mean_sqrt = math.sqrt(exp_avg_hat_sum / param_size)
+        # Calculate the sqrt of the mean of all elements in exp_avg_sq_hat  
+        exp_avg_mean_sqrt = math.sqrt(exp_avg_sq_hat_sum / param_size)
             
-            for group in self.param_groups:
-                for p in group['params']:
-                    if p.grad is None:
-                        continue
+        for group in self.param_groups:
+            for p in group['params']:
+                if p.grad is None:
+                    continue
 
-                    state = self.state[p]
+                state = self.state[p]
 
-                    exp_avg = state['exp_avg']
+                #Perform stable weight decay
+                if group['weight_decay'] !=0:
+                    p.data.mul_(1 - group['weight_decay'] * group['lr'] / exp_avg_mean_sqrt)
 
-                    if group['weight_decay'] !=0:
-                        p.data.mul_(1 - group['weight_decay'] * group['lr'] / exp_avg_mean_sqrt)
-                    
-                    p.addcmul_(exp_avg, - state['adaptive_lr'])
+                beta1, beta2 = group['betas']
+                exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
+                bias_correction1 = 1 - beta1 ** state['step']
+                bias_correction2 = 1 - beta2 ** state['step']
+
+                if amsgrad:
+                    max_exp_avg_sq = state['max_exp_avg_sq']
+                    exp_avg_sq_hat = max_exp_avg_sq / bias_correction2
+                else:
+                    exp_avg_sq_hat = exp_avg_sq / bias_correction2
+                
+                denom = exp_avg_sq_hat.add(group['eps'])
+                
+                step_size = group['lr'] / bias_correction1 
+                p.addcdiv_(exp_avg, denom, value= - step_size)
                 
         return loss
