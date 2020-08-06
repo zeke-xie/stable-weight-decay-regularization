@@ -1,21 +1,18 @@
 import torch
 from torch.optim.optimizer import Optimizer, required
 
-
-class AdaiS(Optimizer):
-    r"""Implements Adai with stable weight decay (AdaiS).
-    It is based on  
-    `Adai: Separating the Effects of Adaptive Learning Rate and Momentum Inertia`
-    and
-    `Stable Weight Decay: Fixing Weight Decay in Deep Learning Librariess`__.
+class Adai(Optimizer):
+    r"""Implements Adaptive Inertia Estimation (Adai) algorithm.
+    It has be proposed in 
+    `Adai: Separating the Effects of Adaptive Learning Rate and Momentum Inertia`__.
 
     Arguments:
         params (iterable): iterable of parameters to optimize or dicts defining
             parameter groups
-        lr (float, optional): learning rate
+        lr (float): learning rate
         betas (Tuple[float, float], optional): beta0 and beta2 (default: (0.1, 0.99))
         eps (float, optional): the inertia bound (default: 1e-03)
-        weight_decay (float, optional): weight decay (Gaussian prior) (default: 0)
+        weight_decay (float, optional): weight decay (L2 penalty) (default: 0)
 
     """
 
@@ -32,11 +29,11 @@ class AdaiS(Optimizer):
         if not 0.0 <= weight_decay:
             raise ValueError("Invalid weight_decay value: {}".format(weight_decay))
         defaults = dict(lr=lr, betas=betas, eps=eps, weight_decay=weight_decay)
-        super(AdaiS, self).__init__(params, defaults)
+        super(Adai, self).__init__(params, defaults)
     
 
     def __setstate__(self, state):
-        super(AdaiS, self).__setstate__(state)
+        super(Adai, self).__setstate__(state)
             
     @torch.no_grad()
     def step(self, closure=None):
@@ -54,7 +51,6 @@ class AdaiS(Optimizer):
         exp_avg_sq_hat_sum = 0.
         
         for group in self.param_groups:
-        
             for p in group['params']:
                 if p.grad is None:
                     continue
@@ -70,44 +66,42 @@ class AdaiS(Optimizer):
                     state['exp_avg'] = torch.zeros_like(p.data, memory_format=torch.preserve_format)
                     # Exponential moving average of squared gradient values
                     state['exp_avg_sq'] = torch.zeros_like(p.data, memory_format=torch.preserve_format)
-                    # Exponential moving average of squared gradient values with the bias correction
-                    state['exp_avg_sq_hat'] = torch.zeros_like(p.data, memory_format=torch.preserve_format)
                     # Cumulative products of beta1
                     state['beta1_prod'] = torch.ones_like(p.data, memory_format=torch.preserve_format)
+                    
+                state['step'] += 1
 
                 exp_avg_sq = state['exp_avg_sq']
-                exp_avg_sq_hat = state['exp_avg_sq_hat']
                 beta0, beta2 = group['betas']
 
-                state['step'] += 1
                 bias_correction2 = 1 - beta2 ** state['step']
+
+                if group['weight_decay'] != 0:
+                    grad.add_(group['weight_decay'], p.data)
                     
                 exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
                 
-                exp_avg_sq_hat.mul_(0.).add_(exp_avg_sq / bias_correction2)
-                
-                exp_avg_sq_hat_sum += exp_avg_sq_hat.sum()
+                exp_avg_sq_hat_sum += exp_avg_sq.sum() / bias_correction2
                 
         # Calculate the mean of all elements in exp_avg_sq_hat
         exp_avg_sq_hat_mean = exp_avg_sq_hat_sum / param_size
-        
+
         for group in self.param_groups:
-        
             for p in group['params']:
                 if p.grad is None:
                     continue
                 grad = p.grad.data
                 
-                # Perform stable/decoupled weight decay
-                if group['weight_decay'] !=0:
-                    p.data.mul_(1 - group['lr'] * group['weight_decay'])
-                
                 state = self.state[p]
 
                 exp_avg = state['exp_avg']
-                exp_avg_sq_hat = state['exp_avg_sq_hat']
+                exp_avg_sq = state['exp_avg_sq']
                 beta1_prod = state['beta1_prod']
                 beta0, beta2 = group['betas']
+
+                bias_correction2 = 1 - beta2 ** state['step']
+
+                exp_avg_sq_hat = exp_avg_sq / bias_correction2
                 beta1 = (1. - (exp_avg_sq_hat / exp_avg_sq_hat_mean).mul(beta0)).clamp(0., 1 - group['eps'])
                 
                 beta1_prod.mul_(beta1)
