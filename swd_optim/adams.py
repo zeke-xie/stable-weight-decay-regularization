@@ -129,7 +129,7 @@ class AdamS(Optimizer):
                 else:
                     exp_avg_sq_hat = exp_avg_sq / bias_correction2
                 
-                denom = exp_avg_sq_hat.add(group['eps'])
+                denom = exp_avg_sq_hat.sqrt().add(group['eps'])
                 
                 step_size = group['lr'] / bias_correction1 
                 p.addcdiv_(exp_avg, denom, value= - step_size)
