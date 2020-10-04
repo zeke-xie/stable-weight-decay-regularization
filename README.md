@@ -11,7 +11,7 @@ The algorithms are proposed in the paper:
 
 Python 3.7.3 
 
-PyTorch >= 1.4.0
+PyTorch = 1.4.0
 
 
 # Usage
