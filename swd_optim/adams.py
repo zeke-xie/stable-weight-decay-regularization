@@ -19,11 +19,11 @@ class AdamS(Optimizer):
         weight_decay (float, optional): weight decay coefficient (default: 1e-4)
         amsgrad (boolean, optional): whether to use the AMSGrad variant of this
             algorithm from the paper `On the Convergence of Adam and Beyond`_
-            (default: True)
+            (default: False)
     """
 
     def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8,
-                 weight_decay=1e-4, amsgrad=True):
+                 weight_decay=1e-4, amsgrad=False):
         if not 0.0 <= lr:
             raise ValueError("Invalid learning rate: {}".format(lr))
         if not 0.0 <= eps:
@@ -41,7 +41,7 @@ class AdamS(Optimizer):
     def __setstate__(self, state):
         super(AdamS, self).__setstate__(state)
         for group in self.param_groups:
-            group.setdefault('amsgrad', True)
+            group.setdefault('amsgrad', False)
 
     @torch.no_grad()
     def step(self, closure=None):
