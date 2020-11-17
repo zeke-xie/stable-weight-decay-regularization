@@ -25,10 +25,10 @@ PyTorch >= 1.4.0
 
 # Usage
 
-#You may use it as a standard PyTorch optimizer.
+You may use it as a standard PyTorch optimizer.
 
 ```python
 import swd_optim
 
-optimizer = adai_optim.AdamS(net.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-08, weight_decay=5e-4, amsgrad=True)
+optimizer = adai_optim.AdamS(net.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-08, weight_decay=5e-4, amsgrad=False)
 ```
