@@ -1,17 +1,17 @@
-# Stable-Weight-Decay-Fixing-Weight-Decay-in-Deep-Learning-Libraries
+# Stable-Weight-Decay-Regularization-Libraries
 
 The PyTorch Implementation of Stable Weight Decay.
 
 The algorithms are proposed in the paper: 
 
-"Stable Weight Decay Regularization: Fixing Weight Decay in Deep Learning Libraries".
+"Stable Weight Decay Regularization".
 
 
 # Why Stable Weight Decay?
 
 We proposed the Stable Weight Decay (SWD) method to fix weight decay in modern deep learning libraries.
 
-SWD make significantly improvements over $L_{2}$ regularization and decoupled weight decay.
+SWD make significantly improvements over both L2 regularization and decoupled weight decay.
 
 Simply fixing weight decay in Adam by SWD, with no extra hyperparameter, can usually outperform complex Adam variants, which have more hyperparameters.
 
