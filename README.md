@@ -1,4 +1,4 @@
-# Stable-Weight-Decay-Regularization-Libraries
+# Stable-Weight-Decay-Regularization
 
 The PyTorch Implementation of Stable Weight Decay.
 
