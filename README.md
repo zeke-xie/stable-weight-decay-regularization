@@ -11,9 +11,11 @@ The algorithms are proposed in the paper:
 
 We proposed the Stable Weight Decay (SWD) method to fix weight decay in modern deep learning libraries.
 
-SWD make significantly improvements over both L2 regularization and decoupled weight decay.
+- SWD usually makes significant improvements over both L2 regularization and decoupled weight decay.
 
-Simply fixing weight decay in Adam by SWD, with no extra hyperparameter, can usually outperform complex Adam variants, which have more hyperparameters.
+- Simply fixing weight decay in Adam by SWD, with no extra hyperparameter, can usually outperform complex Adam variants, which have more hyperparameters.
+
+- SGD with Stable Weight Decay (SGDS) also often outperforms SGD with L2 regularization.
 
 
 # The environment is as bellow:
