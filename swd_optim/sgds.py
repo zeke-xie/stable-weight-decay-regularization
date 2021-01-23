@@ -6,7 +6,7 @@ from torch.optim.optimizer import Optimizer, required
 class SGDS(Optimizer):
     r"""Implements stochastic gradient descent with stable weight decay (SGDS).
     It has be proposed in 
-    `Stable Weight Decay: Fixing Weight Decay in Deep Learning Libraries`__.
+    `Stable Weight Decay Regularization`__.
     
     Args:
         params (iterable): iterable of parameters to optimize or dicts defining
