@@ -3,11 +3,11 @@ from torch.optim.optimizer import Optimizer, required
 
 
 class AdaiS(Optimizer):
-    r"""Implements Adai with stable weight decay (AdaiS).
+    r"""Implements Adai with stable/decoupled weight decay (AdaiS/AdaiW).
     It is based on  
     `Adai: Separating the Effects of Adaptive Learning Rate and Momentum Inertia`
     and
-    `Stable Weight Decay: Fixing Weight Decay in Deep Learning Librariess`__.
+    `Stable Weight Decay Regularization`__.
 
     Arguments:
         params (iterable): iterable of parameters to optimize or dicts defining
