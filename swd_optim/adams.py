@@ -6,7 +6,7 @@ from torch.optim.optimizer import Optimizer
 class AdamS(Optimizer):
     r"""Implements Adam with stable weight decay (AdamS) algorithm.
     It has be proposed in 
-    `Stable Weight Decay: Fixing Weight Decay in Deep Learning Libraries`__.
+    `Stable Weight Decay Regularization`__.
 
     Arguments:
         params (iterable): iterable of parameters to optimize or dicts defining
