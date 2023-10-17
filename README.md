@@ -1,21 +1,22 @@
-# Stable-Weight-Decay-Regularization
+# Scheduled(Stable)-Weight-Decay-Regularization
 
-The PyTorch Implementation of Stable Weight Decay.
+The PyTorch Implementation of Scheduled (Stable) Weight Decay.
 
-The algorithms are proposed in the paper: 
+The algorithms were first proposed in our arxiv paper.
 
-["Stable Weight Decay Regularization"](https://arxiv.org/abs/2011.11152).
+A formal version with major revision ["On the Overlooked Pitfalls of Weight Decay and How to Mitigate Them: A Gradient-Norm Perspective"](https://openreview.net/pdf?id=vnGcubtzR1) is accepted at NeurIPS2023.
 
 
-# Why Stable Weight Decay?
+# Why Scheduled (Stable) Weight Decay?
 
-We proposed the Stable Weight Decay (SWD) method to fix weight decay in modern deep learning libraries.
+We proposed the Scheduled (Stable) Weight Decay (SWD) method to mitigate overlooked large-gradient-norm pitfalls of weight decay in modern deep learning libraries.
+
+- SWD can penalize the large gradient norms at the final phase of training.
 
 - SWD usually makes significant improvements over both L2 regularization and decoupled weight decay.
 
 - Simply fixing weight decay in Adam by SWD, with no extra hyperparameter, can usually outperform complex Adam variants, which have more hyperparameters.
 
-- SGD with Stable Weight Decay (SGDS) also often outperforms SGD with L2 regularization.
 
 
 # The environment is as bellow:
@@ -47,13 +48,13 @@ optimizer = swd_optim.AdamS(net.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1
 
 # Citing
 
-If you use Stable Weight Decay in your work, please cite ["Stable Weight Decay Regularization"](https://arxiv.org/abs/2011.11152).
+If you use Scheduled (Stable) Weight Decay in your work, please cite ["On the Overlooked Pitfalls of Weight Decay and How to Mitigate Them: A Gradient-Norm Perspective"](https://openreview.net/pdf?id=vnGcubtzR1).
 
 ```
-@article{xie2020stable,
-  title={Stable Weight Decay Regularization},
-  author={Xie, Zeke and Sato, Issei and Sugiyama, Masashi},
-  journal={arXiv preprint arXiv:2011.11152},
-  year={2020}
+@inproceedings{xie2023onwd,
+    title={On the Overlooked Pitfalls of Weight Decay and How to Mitigate Them: A Gradient-Norm Perspective},
+    author={Xie, Zeke and Xu, Zhiqiang and Zhang, Jingzhao and Sato, Issei and Sugiyama, Masashi},
+    booktitle={Thirty-seventh Conference on Neural Information Processing Systems},
+    year={2023}
 }
 ```
