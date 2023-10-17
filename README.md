@@ -4,7 +4,7 @@ The PyTorch Implementation of Scheduled (Stable) Weight Decay.
 
 The algorithms were first proposed in our arxiv paper.
 
-A formal version with major revision ["On the Overlooked Pitfalls of Weight Decay and How to Mitigate Them: A Gradient-Norm Perspective"](https://openreview.net/pdf?id=vnGcubtzR1) is accepted at NeurIPS2023.
+A formal version with major revision and theoretical mechanism ["On the Overlooked Pitfalls of Weight Decay and How to Mitigate Them: A Gradient-Norm Perspective"](https://openreview.net/pdf?id=vnGcubtzR1) is accepted at NeurIPS 2023.
 
 
 # Why Scheduled (Stable) Weight Decay?
