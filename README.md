@@ -11,7 +11,7 @@ A formal version with major revision and theoretical mechanism ["On the Overlook
 
 We proposed the Scheduled (Stable) Weight Decay (SWD) method to mitigate overlooked large-gradient-norm pitfalls of weight decay in modern deep learning libraries.
 
-- SWD can penalize the large gradient norms at the final phase of training.
+- SWD can **penalize the large gradient norms** at the final phase of training.
 
 - SWD usually makes significant improvements over both L2 regularization and decoupled weight decay.
 
@@ -35,6 +35,8 @@ import swd_optim
 
 optimizer = swd_optim.AdamS(net.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-08, weight_decay=5e-4, amsgrad=False)
 ```
+
+
 # Test performance
 
 
